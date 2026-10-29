@@ -41,12 +41,12 @@ jobs:
         if: steps.exists.outputs.skip == 'false'
         run: |
           php -l deluminator.php
-          php -l includes/updater.php
+          for f in includes/*.php uninstall.php; do php -l "$f"; done
       - name: Build zip
         if: steps.exists.outputs.skip == 'false'
         run: |
           mkdir -p build/deluminator
-          cp -r deluminator.php includes assets vendor readme.txt LICENSE build/deluminator/
+          cp -r deluminator.php uninstall.php includes assets languages vendor readme.txt LICENSE build/deluminator/
           cd build && zip -qr ../deluminator.zip deluminator
       - name: Create release
         if: steps.exists.outputs.skip == 'false'

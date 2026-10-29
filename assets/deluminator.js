@@ -1,55 +1,65 @@
 /*!
- * Deluminator — light/dark switch for aardling.com.
+ * Deluminator — light/dark/auto switch.
  * The circular reveal follows SveltePress's ToggleDark (MIT), which is what
- * writewithharper.com used: it animates a real snapshot of the page with the
- * View Transitions API rather than a flat coloured overlay.
+ * writewithharper.com used: the View Transitions API snapshots the page before
+ * and after, and a clip-path circle grows or shrinks between them from the switch.
+ * The clip animation is declared in CSS with fill both, so it holds from the
+ * first frame to the last and the page never flashes at either end.
  */
 (function () {
 	'use strict';
 
-	var root      = document.documentElement;
-	var button    = document.getElementById('deluminator');
-	var icon      = button && button.querySelector('.deluminator__icon');
-	var sun       = document.getElementById('deluminator-sun');
-	var moon      = document.getElementById('deluminator-moon');
-	var meta      = document.getElementById('deluminator-theme-color');
-	var settings  = window.deluminatorSettings || {};
-	var KEY       = 'deluminator';
-	var DARK      = 'deluminator-dark';
-	var systemDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
-	var lessMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+	var root   = document.documentElement;
+	var D      = window.deluminator;
+	var button = document.getElementById('deluminator');
+	var icon   = button && button.querySelector('.deluminator__icon');
+	if (!D || !button || !icon) return;
 
-	if (!button || !icon) return;
+	var labels   = (window.deluminatorSettings && window.deluminatorSettings.labels) || {};
+	var icons    = { auto: 'deluminator-auto', light: 'deluminator-light', dark: 'deluminator-dark' };
+	var KEY      = 'deluminator';
+	var systemQ  = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+	var motionQ  = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+	var current  = null;
 
-	function stored() {
-		try { return localStorage.getItem(KEY); } catch (e) { return null; }
+	function store(mode) {
+		try {
+			if (mode === 'auto') localStorage.removeItem(KEY);
+			else localStorage.setItem(KEY, mode);
+		} catch (e) {}
 	}
 
-	function store(value) {
-		try { localStorage.setItem(KEY, value); } catch (e) {}
+	// From Auto, the first click always changes what you see; the third click returns to Auto.
+	function next(mode) {
+		var sys = D.systemDark();
+		if (mode === 'auto') return sys ? 'light' : 'dark';
+		if (mode === 'light') return sys ? 'dark' : 'auto';
+		return sys ? 'auto' : 'light';
 	}
 
-	function isDark() {
-		return root.classList.contains(DARK);
-	}
-
-	function showIcon(dark) {
-		var tpl = dark ? moon : sun;
-		if (!tpl) return;
-		icon.replaceChildren(tpl.content.cloneNode(true)); // Fresh copy replays the drawing animation.
-	}
-
-	function apply(dark) {
-		root.classList.toggle(DARK, dark);
-		root.style.colorScheme = dark ? 'dark' : 'light';
-		if (meta) meta.setAttribute('content', dark ? settings.themeColorDark : settings.themeColorLight);
-		var label = dark ? settings.labelToLight : settings.labelToDark;
+	function render(mode) {
+		var tpl = document.getElementById(icons[mode]);
+		if (tpl) icon.replaceChildren(tpl.content.cloneNode(true)); // A fresh copy replays the drawing animation.
+		var label = [labels['state_' + mode], labels['to_' + next(mode)]].filter(Boolean).join(' ');
 		if (label) {
 			button.setAttribute('aria-label', label);
 			button.setAttribute('title', label);
 		}
-		button.setAttribute('aria-pressed', dark ? 'true' : 'false');
-		showIcon(dark);
+	}
+
+	// Mobile address-bar colour: whatever the page background actually is now.
+	function syncThemeColor() {
+		var meta = document.getElementById('deluminator-theme-color');
+		if (!meta || !document.body) return;
+		var bg = getComputedStyle(document.body).backgroundColor;
+		if (!bg || bg === 'transparent' || bg === 'rgba(0, 0, 0, 0)') bg = getComputedStyle(root).backgroundColor;
+		if (bg && bg !== 'rgba(0, 0, 0, 0)') meta.setAttribute('content', bg);
+	}
+
+	function update(mode) {
+		D.setMode(mode);
+		render(mode);
+		syncThemeColor();
 	}
 
 	function origin(event) {
@@ -59,57 +69,68 @@
 		return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
 	}
 
-	function toggle(event) {
-		var dark = !isDark();
-		store(dark ? 'dark' : 'light');
+	function clearSwitching() {
+		root.classList.remove('deluminator-switching', 'deluminator-to-dark', 'deluminator-to-light');
+	}
 
-		if (!document.startViewTransition || (lessMotion && lessMotion.matches)) {
-			apply(dark);
+	function change(mode, event) {
+		var wasDark = root.classList.contains('deluminator-dark');
+		var dark    = D.isDark(mode);
+		store(mode);
+
+		// Same look (e.g. Dark → Auto on a dark device), no transitions, or less motion asked for: just swap.
+		if (dark === wasDark || !event || !document.startViewTransition || (motionQ && motionQ.matches)) {
+			update(mode);
 			return;
 		}
 
+		if (current) {
+			try { current.skipTransition(); } catch (e) {}
+		}
+
 		var o = origin(event);
-		var radius = Math.hypot(
-			Math.max(o.x, window.innerWidth - o.x),
-			Math.max(o.y, window.innerHeight - o.y)
-		);
+		var radius = Math.ceil(Math.hypot(Math.max(o.x, window.innerWidth - o.x), Math.max(o.y, window.innerHeight - o.y)));
+		root.style.setProperty('--dl-x', o.x + 'px');
+		root.style.setProperty('--dl-y', o.y + 'px');
+		root.style.setProperty('--dl-r', radius + 'px');
+		clearSwitching();
+		root.classList.add('deluminator-switching', dark ? 'deluminator-to-dark' : 'deluminator-to-light');
 
-		root.classList.add('deluminator-switching');
-		var transition = document.startViewTransition(function () { apply(dark); });
-
-		transition.ready.then(function () {
-			var small = 'circle(0px at ' + o.x + 'px ' + o.y + 'px)';
-			var large = 'circle(' + radius + 'px at ' + o.x + 'px ' + o.y + 'px)';
-			// To dark: the lit page shrinks into the switch. To light: it grows back out.
-			root.animate(
-				{ clipPath: dark ? [large, small] : [small, large] },
-				{
-					duration: 450,
-					easing: dark ? 'cubic-bezier(.55,0,.75,.45)' : 'cubic-bezier(.25,.55,.45,1)',
-					pseudoElement: dark ? '::view-transition-old(root)' : '::view-transition-new(root)'
-				}
-			);
-		}).catch(function () {});
-
-		transition.finished.finally(function () {
-			root.classList.remove('deluminator-switching');
+		var t = current = document.startViewTransition(function () { update(mode); });
+		t.finished.finally(function () {
+			if (current === t) {
+				clearSwitching();
+				current = null;
+			}
 		});
 	}
 
-	button.addEventListener('click', toggle);
-
-	// Follow the system setting until the visitor makes a choice of their own.
-	if (systemDark) {
-		var follow = function (e) { if (stored() === null) apply(e.matches); };
-		if (systemDark.addEventListener) systemDark.addEventListener('change', follow);
-		else if (systemDark.addListener) systemDark.addListener(follow);
-	}
-
-	// Keep tabs in step: switching in one tab switches the others.
-	window.addEventListener('storage', function (e) {
-		if (e.key === KEY && (e.newValue === 'dark' || e.newValue === 'light')) apply(e.newValue === 'dark');
+	button.addEventListener('click', function (event) {
+		change(next(D.mode), event);
 	});
 
-	apply(isDark()); // The head script already set the mode; sync the switch with it.
+	// In Auto, follow the device when it switches (sunset, Focus mode, Control Centre).
+	if (systemQ) {
+		var follow = function () { if (D.mode === 'auto') update('auto'); else render(D.mode); };
+		if (systemQ.addEventListener) systemQ.addEventListener('change', follow);
+		else if (systemQ.addListener) systemQ.addListener(follow);
+	}
+
+	// Keep tabs in step.
+	window.addEventListener('storage', function (e) {
+		if (e.key !== KEY) return;
+		update(e.newValue === 'light' || e.newValue === 'dark' ? e.newValue : 'auto');
+	});
+
+	// Stylesheets that arrive late (deferred or in the footer) may hold the theme's own dark mode.
+	function rescan() {
+		D.scan();
+		D.apply();
+		syncThemeColor();
+	}
+	window.addEventListener('load', rescan);
+	rescan();
+
+	render(D.mode);
 	button.classList.add('is-ready');
 })();
