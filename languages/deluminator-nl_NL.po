@@ -1,0 +1,30 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Deluminator 1.1.0\n"
+"Language: nl_NL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Colour scheme"
+msgstr "Kleurenschema"
+
+msgid "Colour scheme: automatic, as your device is set."
+msgstr "Kleurenschema: automatisch, zoals je toestel staat ingesteld."
+
+msgid "Colour scheme: light."
+msgstr "Kleurenschema: licht."
+
+msgid "Colour scheme: dark."
+msgstr "Kleurenschema: donker."
+
+msgid "Switch to automatic."
+msgstr "Schakel naar automatisch."
+
+msgid "Switch to light."
+msgstr "Schakel naar licht."
+
+msgid "Switch to dark."
+msgstr "Schakel naar donker."
+
