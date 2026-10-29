@@ -1,0 +1,58 @@
+name: Release
+
+# Every push to main: if the Version: header in deluminator.php has no release yet,
+# lint, build deluminator.zip (folder deluminator/ inside) and create release vX.Y.Z.
+# aardling.com picks the release up through plugin-update-checker and auto-updates.
+# Pushes that don't change the version do nothing.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read version
+        id: v
+        run: |
+          HEADER=$(grep -m1 -E '^\s*\*\s*Version:' deluminator.php | sed -E 's/.*Version:\s*//' | tr -d '[:space:]')
+          CONST=$(grep -m1 "DELUMINATOR_VERSION =" deluminator.php | sed -E "s/.*'([0-9.]+)'.*/\1/")
+          STABLE=$(grep -m1 -E '^Stable tag:' readme.txt | sed -E 's/Stable tag:\s*//' | tr -d '[:space:]')
+          echo "header=$HEADER const=$CONST stable=$STABLE"
+          test "$HEADER" = "$CONST" && test "$HEADER" = "$STABLE"
+          echo "version=$HEADER" >> "$GITHUB_OUTPUT"
+      - name: Skip if released
+        id: exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "v${{ steps.v.outputs.version }}" >/dev/null 2>&1; then echo "skip=true" >> "$GITHUB_OUTPUT"; else echo "skip=false" >> "$GITHUB_OUTPUT"; fi
+      - name: Lint PHP
+        if: steps.exists.outputs.skip == 'false'
+        run: |
+          php -l deluminator.php
+          php -l includes/updater.php
+      - name: Build zip
+        if: steps.exists.outputs.skip == 'false'
+        run: |
+          mkdir -p build/deluminator
+          cp -r deluminator.php includes assets vendor readme.txt LICENSE build/deluminator/
+          cd build && zip -qr ../deluminator.zip deluminator
+      - name: Create release
+        if: steps.exists.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="${{ steps.v.outputs.version }}"
+          NOTES=$(awk -v v="$V" '$0 == "## "v {f=1; next} /^## / {f=0} f' CHANGELOG.md)
+          gh release create "v$V" deluminator.zip --target "$GITHUB_SHA" --title "v$V" --notes "${NOTES:-Release v$V}"

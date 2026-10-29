@@ -1,0 +1,438 @@
+/* Deluminator — light/dark switch for aardling.com (Twenty Nineteen). */
+
+/* ---------- The switch ---------- */
+
+.deluminator {
+	position: fixed;
+	top: 0.75rem;
+	right: 0.75rem;
+	z-index: 100000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	/* A frosted disc keeps the switch visible over header photos as well as plain pages. */
+	background: rgba(255, 255, 255, 0.72);
+	-webkit-backdrop-filter: blur(8px);
+	backdrop-filter: blur(8px);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+	color: #111;
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity 0.2s ease, background-color 0.2s ease;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.deluminator.is-ready { opacity: 1; }
+
+.admin-bar .deluminator { top: calc(32px + 0.75rem); }
+
+@media screen and (max-width: 782px) {
+	.admin-bar .deluminator { top: calc(46px + 0.75rem); }
+}
+
+/* Twenty Nineteen turns every button blue/black on hover and focus; keep this one quiet. */
+.deluminator:hover,
+.deluminator:focus,
+html .deluminator:hover,
+html .deluminator:focus {
+	background: rgba(255, 255, 255, 0.92);
+	color: #111;
+}
+
+.deluminator:focus { outline: none; }
+
+.deluminator:focus-visible {
+	outline: 2px solid #4169e1;
+	outline-offset: 2px;
+}
+
+.deluminator__icon,
+.deluminator__icon svg {
+	display: block;
+	width: 24px;
+	height: 24px;
+}
+
+/* ---------- The reveal (View Transitions) ---------- */
+
+html.deluminator-switching::view-transition-old(root),
+html.deluminator-switching::view-transition-new(root) {
+	animation: none;
+	mix-blend-mode: normal;
+}
+
+/* Going dark the old, lit page sits on top and shrinks away; going light the new, lit page grows on top. */
+html.deluminator-switching::view-transition-old(root) { z-index: 1; }
+html.deluminator-switching::view-transition-new(root) { z-index: 9999; }
+html.deluminator-switching.deluminator-dark::view-transition-old(root) { z-index: 9999; }
+html.deluminator-switching.deluminator-dark::view-transition-new(root) { z-index: 1; }
+
+/* ---------- Dark mode ---------- */
+
+html.deluminator-dark {
+	--dl-bg: #141414;
+	--dl-surface: #1e1e1e;
+	--dl-text: #e6e6e6;
+	--dl-strong: #f5f5f5;
+	--dl-muted: #a3a3a3;
+	--dl-line: #3a3a3a;
+	--dl-link: #8ea8f5;       /* aardling.com's royal blue (#4169e1), lifted for a dark page */
+	--dl-link-hover: #b9c8fa;
+	--dl-accent: #4169e1;
+	background-color: var(--dl-bg);
+	color-scheme: dark;
+}
+
+html.deluminator-dark body,
+html.deluminator-dark .site,
+html.deluminator-dark .site-content {
+	background-color: var(--dl-bg);
+	color: var(--dl-text);
+}
+
+html.deluminator-dark ::selection {
+	background: #2f4a99;
+	color: #fff;
+}
+
+/* The switch in the dark */
+html.deluminator-dark .deluminator,
+html.deluminator-dark .deluminator:hover,
+html.deluminator-dark .deluminator:focus { color: var(--dl-strong); }
+html.deluminator-dark .deluminator {
+	background: rgba(30, 30, 30, 0.72);
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+html.deluminator-dark .deluminator:hover,
+html.deluminator-dark .deluminator:focus { background: rgba(45, 45, 45, 0.92); }
+html.deluminator-dark .deluminator:focus-visible { outline-color: var(--dl-link); }
+
+/* Links */
+html.deluminator-dark a,
+html.deluminator-dark a:visited,
+html.deluminator-dark .main-navigation .main-menu > li,
+html.deluminator-dark .main-navigation .main-menu > li > a,
+html.deluminator-dark .entry .entry-content a,
+html.deluminator-dark .entry .entry-summary a,
+html.deluminator-dark .comment .comment-content a,
+html.deluminator-dark .site-footer a,
+html.deluminator-dark .entry .entry-meta a:hover,
+html.deluminator-dark .entry .entry-footer a:hover,
+html.deluminator-dark .widget a:hover {
+	color: var(--dl-link);
+}
+
+html.deluminator-dark a:hover,
+html.deluminator-dark a:active,
+html.deluminator-dark .main-navigation .main-menu > li > a:hover,
+html.deluminator-dark .entry .entry-content a:hover,
+html.deluminator-dark .site-footer a:hover {
+	color: var(--dl-link-hover);
+}
+
+/* Headings, titles, strong text */
+html.deluminator-dark h1,
+html.deluminator-dark h2,
+html.deluminator-dark h3,
+html.deluminator-dark h4,
+html.deluminator-dark h5,
+html.deluminator-dark h6,
+html.deluminator-dark b,
+html.deluminator-dark strong,
+html.deluminator-dark .site-title,
+html.deluminator-dark .site-title a,
+html.deluminator-dark .site-title a:link,
+html.deluminator-dark .site-title a:visited,
+html.deluminator-dark .entry .entry-title,
+html.deluminator-dark .entry .entry-title a,
+html.deluminator-dark .post-navigation .nav-links .post-title,
+html.deluminator-dark .archive .page-header .page-description,
+html.deluminator-dark .search .page-header .page-description,
+html.deluminator-dark .author-bio .author-title,
+html.deluminator-dark .comments-title,
+html.deluminator-dark .comment .comment-author .fn,
+html.deluminator-dark .comment .comment-author .fn a,
+html.deluminator-dark .social-navigation ul.social-links-menu li a,
+html.deluminator-dark .entry .entry-content .wp-block-pullquote {
+	color: var(--dl-strong);
+}
+
+html.deluminator-dark .site-title a:hover,
+html.deluminator-dark .entry .entry-title a:hover {
+	color: var(--dl-muted);
+}
+
+/* Secondary text */
+html.deluminator-dark .site-branding,
+html.deluminator-dark .site-description,
+html.deluminator-dark .site-header.featured-image .site-description,
+html.deluminator-dark .site-info,
+html.deluminator-dark #colophon .site-info,
+html.deluminator-dark .entry .entry-meta,
+html.deluminator-dark .entry .entry-footer,
+html.deluminator-dark .entry .entry-meta a,
+html.deluminator-dark .entry .entry-footer a,
+html.deluminator-dark .post-navigation .nav-links a .meta-nav,
+html.deluminator-dark .archive .page-header .page-title,
+html.deluminator-dark .search .page-header .page-title,
+html.deluminator-dark .error404 .page-header .page-title,
+html.deluminator-dark .author-bio .author-description,
+html.deluminator-dark .comment .comment-metadata,
+html.deluminator-dark .comment .comment-metadata > a,
+html.deluminator-dark .comment .comment-metadata .comment-edit-link,
+html.deluminator-dark .comment-form .comment-notes,
+html.deluminator-dark .comment-form label,
+html.deluminator-dark .wp-caption-text,
+html.deluminator-dark figcaption,
+html.deluminator-dark .wp-element-caption,
+html.deluminator-dark blockquote cite,
+html.deluminator-dark .entry .entry-content .wp-block-pullquote cite,
+html.deluminator-dark .entry .entry-content .wp-block-latest-posts .wp-block-latest-posts__post-date,
+html.deluminator-dark .widget_archive ul li,
+html.deluminator-dark .widget_categories ul li,
+html.deluminator-dark .widget_meta ul li,
+html.deluminator-dark .widget_nav_menu ul li,
+html.deluminator-dark .widget_pages ul li,
+html.deluminator-dark .widget_recent_comments ul li,
+html.deluminator-dark .widget_recent_entries ul li,
+html.deluminator-dark .widget_rss ul li {
+	color: var(--dl-muted);
+}
+
+/* The short rules Twenty Nineteen draws above titles, and separators */
+html.deluminator-dark .entry .entry-title:before,
+html.deluminator-dark h1:not(.site-title):before,
+html.deluminator-dark h2:before,
+html.deluminator-dark .author-bio .author-title:before,
+html.deluminator-dark .comments-area .comments-title-wrap .comments-title:before {
+	background: var(--dl-muted);
+}
+
+html.deluminator-dark hr,
+html.deluminator-dark .entry .entry-content hr,
+html.deluminator-dark .entry .entry-content .wp-block-separator {
+	background-color: var(--dl-line);
+	border-color: var(--dl-line);
+}
+
+html.deluminator-dark .entry .entry-content .wp-block-separator.is-style-dots:before {
+	color: var(--dl-muted);
+}
+
+/* Quotes, code, tables, marks */
+html.deluminator-dark blockquote,
+html.deluminator-dark .entry .entry-content blockquote {
+	border-color: var(--dl-accent);
+	color: var(--dl-text);
+}
+
+html.deluminator-dark pre,
+html.deluminator-dark code,
+html.deluminator-dark kbd,
+html.deluminator-dark .entry .entry-content .wp-block-code,
+html.deluminator-dark .entry .entry-content .wp-block-preformatted pre,
+html.deluminator-dark .entry .entry-content .wp-block-verse {
+	background-color: var(--dl-surface);
+	border-color: var(--dl-line);
+	color: var(--dl-text);
+}
+
+html.deluminator-dark table td,
+html.deluminator-dark table th,
+html.deluminator-dark .entry .entry-content .wp-block-table td,
+html.deluminator-dark .entry .entry-content .wp-block-table th {
+	border-color: var(--dl-line);
+}
+
+html.deluminator-dark mark,
+html.deluminator-dark ins {
+	background: #5c5320;
+	color: var(--dl-strong);
+}
+
+/* Forms and buttons */
+html.deluminator-dark input[type="text"],
+html.deluminator-dark input[type="email"],
+html.deluminator-dark input[type="url"],
+html.deluminator-dark input[type="password"],
+html.deluminator-dark input[type="search"],
+html.deluminator-dark input[type="number"],
+html.deluminator-dark input[type="tel"],
+html.deluminator-dark input[type="date"],
+html.deluminator-dark textarea,
+html.deluminator-dark select {
+	background: var(--dl-surface);
+	border-color: var(--dl-line);
+	color: var(--dl-text);
+}
+
+html.deluminator-dark input[type="text"]:focus,
+html.deluminator-dark input[type="email"]:focus,
+html.deluminator-dark input[type="url"]:focus,
+html.deluminator-dark input[type="search"]:focus,
+html.deluminator-dark textarea:focus {
+	border-color: var(--dl-link);
+	outline-color: rgba(142, 168, 245, 0.25);
+}
+
+html.deluminator-dark ::placeholder { color: var(--dl-muted); }
+
+html.deluminator-dark .button:hover,
+html.deluminator-dark button:not(.deluminator):hover,
+html.deluminator-dark input[type="button"]:hover,
+html.deluminator-dark input[type="submit"]:hover,
+html.deluminator-dark .button:focus,
+html.deluminator-dark button:not(.deluminator):focus,
+html.deluminator-dark input[type="submit"]:focus,
+html.deluminator-dark .entry .entry-content .wp-block-button .wp-block-button__link:hover,
+html.deluminator-dark .entry .entry-content .wp-block-button .wp-block-button__link:focus,
+html.deluminator-dark .comment .comment-reply-link:hover {
+	background: var(--dl-strong);
+	color: var(--dl-bg);
+}
+
+html.deluminator-dark .entry .entry-content .wp-block-button.is-style-outline .wp-block-button__link:not(.has-text-color) {
+	color: var(--dl-link);
+}
+
+/* Colours authors pick in the editor that disappear on a dark page */
+html.deluminator-dark .entry .entry-content .has-dark-gray-color,
+html.deluminator-dark .entry .entry-content .has-black-color { color: var(--dl-strong); }
+html.deluminator-dark .entry .entry-content .has-light-gray-color { color: var(--dl-muted); }
+html.deluminator-dark .entry .entry-content .has-white-background-color {
+	background-color: var(--dl-surface);
+	color: var(--dl-text);
+}
+html.deluminator-dark .entry .entry-content .has-white-background-color > * { color: inherit; }
+
+/* Images: a touch dimmer so they don't glare, back to full on hover */
+html.deluminator-dark .entry .entry-content img,
+html.deluminator-dark .post-thumbnail img,
+html.deluminator-dark .site-featured-image img {
+	filter: brightness(0.85);
+	transition: filter 0.3s ease;
+}
+
+html.deluminator-dark .entry .entry-content img:hover,
+html.deluminator-dark .post-thumbnail img:hover {
+	filter: none;
+}
+
+/* Logos and transparent PNGs drawn in black would vanish */
+html.deluminator-dark .custom-logo-link,
+html.deluminator-dark .site-logo .custom-logo-link {
+	background: transparent;
+}
+
+/* Comments */
+html.deluminator-dark .comment .comment-body,
+html.deluminator-dark .comment-list .pingback .comment-body,
+html.deluminator-dark .comment-list .trackback .comment-body {
+	color: var(--dl-text);
+}
+
+html.deluminator-dark .comment .comment-author .avatar,
+html.deluminator-dark .comment-list .pingback .comment-body,
+html.deluminator-dark .comment-list .trackback .comment-body {
+	border-color: var(--dl-line);
+}
+
+/* Sub-menus (Twenty Nineteen draws them blue) stay as they are; only the arrow needs light */
+html.deluminator-dark .main-navigation .main-menu .menu-item-has-children > a svg,
+html.deluminator-dark .main-navigation .main-menu .menu-item-has-children .submenu-expand svg,
+html.deluminator-dark .social-navigation svg,
+html.deluminator-dark .entry .entry-meta .svg-icon,
+html.deluminator-dark .entry .entry-footer .svg-icon {
+	fill: currentColor;
+}
+
+/* aardling.com's own panels (Additional CSS): footer, author box, post footer frame */
+html.deluminator-dark .site-footer,
+html.deluminator-dark .author-bio {
+	background-color: var(--dl-surface);
+}
+
+html.deluminator-dark .entry .entry-footer {
+	border-color: var(--dl-line);
+}
+
+/* "Lees verder" pill */
+html.deluminator-dark .entry .entry-content .more-link {
+	background: #262626;
+	color: var(--dl-link);
+}
+
+html.deluminator-dark .entry .entry-content .more-link:hover,
+html.deluminator-dark .entry .entry-content .more-link:active {
+	background: var(--dl-accent);
+	color: #fff;
+}
+
+/* Paragraphs given a light background in the editor (TL;DR boxes and the like) */
+html.deluminator-dark .entry .entry-content [style*="background-color:#eee"],
+html.deluminator-dark .entry .entry-content [style*="background-color:#EEE"],
+html.deluminator-dark .entry .entry-content [style*="background-color:#fff"],
+html.deluminator-dark .entry .entry-content [style*="background-color:#FFF"],
+html.deluminator-dark .entry .entry-content [style*="background-color:#f5f5f7"],
+html.deluminator-dark .entry .entry-content [style*="background-color:#f7f7f7"],
+html.deluminator-dark .entry .entry-content [style*="background-color:#fafafa"],
+html.deluminator-dark .entry .entry-content [style*="background-color:#f1f1f1"],
+html.deluminator-dark .entry .entry-content [style*="background-color:#f0f0f0"],
+html.deluminator-dark .entry .entry-content [style*="background-color:#e8e8ed"] {
+	background-color: var(--dl-surface) !important;
+	color: var(--dl-text);
+}
+
+/* Mobile bottom navigation (WP Mobile Bottom Menu) */
+html.deluminator-dark .bnav_bottom_nav_wrapper {
+	background-color: rgba(20, 20, 20, 0.85) !important;
+	box-shadow: 0 -1px 0 var(--dl-line), 0 10px 34px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.deluminator-dark .bnav_main_menu_container ul.bnav_main_menu {
+	background-color: transparent !important;
+}
+
+html.deluminator-dark .bnav_bottom_nav_wrapper ul li a .text_wrapper,
+html.deluminator-dark .bnav_bottom_nav_wrapper ul li a .icon_wrapper i,
+html.deluminator-dark .bnav_bottom_nav_wrapper .icon_wrapper svg {
+	color: var(--dl-muted) !important;
+	fill: currentColor;
+}
+
+html.deluminator-dark .bnav_bottom_nav_wrapper ul li.current-menu-item a .text_wrapper,
+html.deluminator-dark .bnav_bottom_nav_wrapper ul li.current-menu-item a .icon_wrapper i,
+html.deluminator-dark .bnav_bottom_nav_wrapper ul li > a .bnav_menu_items:hover .text_wrapper,
+html.deluminator-dark .bnav_bottom_nav_wrapper ul li > a .bnav_menu_items:hover .icon_wrapper i {
+	color: var(--dl-link) !important;
+}
+
+/* Modern Footnotes: the number sits in a blue bubble */
+html.deluminator-dark .modern-footnotes-footnote a,
+html.deluminator-dark .modern-footnotes-footnote a:visited,
+html.deluminator-dark .entry .entry-content .modern-footnotes-footnote a,
+html.deluminator-dark .entry .entry-content .modern-footnotes-footnote a:hover {
+	color: #fff;
+}
+
+/* Modern Footnotes */
+html.deluminator-dark .modern-footnotes-footnote__note {
+	background: var(--dl-surface);
+	border-color: var(--dl-line);
+	color: var(--dl-text);
+}
+
+html.deluminator-dark .modern-footnotes-list {
+	border-color: var(--dl-line);
+}
+
+/* Print stays light */
+@media print {
+	.deluminator { display: none; }
+}
