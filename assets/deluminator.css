@@ -4,7 +4,6 @@
 
 .deluminator {
 	position: fixed;
-	top: 0.75rem;
 	right: 0.75rem;
 	z-index: 100000;
 	display: flex;
@@ -30,10 +29,47 @@
 
 .deluminator.is-ready { opacity: 1; }
 
-.admin-bar .deluminator { top: calc(32px + 0.75rem); }
+/*
+ * Clear the admin bar while it is on screen. The script sets --dl-top to the bar's
+ * visible height (on phones the bar scrolls away with the page, so it shrinks to 0).
+ * The fallbacks cover the moment before the script runs.
+ */
+.deluminator { top: calc(var(--dl-top, 0px) + 0.75rem); }
+.admin-bar .deluminator { top: calc(var(--dl-top, 32px) + 0.75rem); }
 
 @media screen and (max-width: 782px) {
-	.admin-bar .deluminator { top: calc(46px + 0.75rem); }
+	.admin-bar .deluminator { top: calc(var(--dl-top, 46px) + 0.75rem); }
+}
+
+/*
+ * Where the switch would sit over the text (phones), it slides out of the way while
+ * you scroll down to read and comes back as soon as you scroll up, like Safari's own bars.
+ */
+.deluminator.is-ready {
+	transition: opacity 0.2s ease, background-color 0.2s ease, transform 0.25s ease;
+}
+
+.deluminator.is-ready.is-tucked {
+	opacity: 0;
+	transform: translateY(calc(-100% - 1rem));
+	pointer-events: none;
+}
+
+.deluminator.is-ready.is-tucked:focus-visible {
+	opacity: 1;
+	transform: none;
+	pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.deluminator.is-ready.is-tucked { transform: none; }
+}
+
+/* Twenty Nineteen on phones: keep the site title and motto clear of the switch at the top of the page. */
+@media screen and (max-width: 767px) {
+	.site-header .site-branding {
+		padding-right: calc(44px + 0.75rem + 0.5rem);
+	}
 }
 
 /* Twenty Nineteen turns every button blue/black on hover and focus; keep this one quiet. */
@@ -172,10 +208,11 @@ html.deluminator-palette.deluminator-dark h5,
 html.deluminator-palette.deluminator-dark h6,
 html.deluminator-palette.deluminator-dark b,
 html.deluminator-palette.deluminator-dark strong,
-html.deluminator-palette.deluminator-dark .site-title,
-html.deluminator-palette.deluminator-dark .site-title a,
-html.deluminator-palette.deluminator-dark .site-title a:link,
-html.deluminator-palette.deluminator-dark .site-title a:visited,
+html.deluminator-palette.deluminator-dark .site-header:not(.featured-image) .site-title,
+html.deluminator-palette.deluminator-dark .site-header:not(.featured-image) .site-title a,
+html.deluminator-palette.deluminator-dark .site-header:not(.featured-image) .site-title a:link,
+html.deluminator-palette.deluminator-dark .site-header:not(.featured-image) .site-title a:visited,
+html.deluminator-palette.deluminator-dark .site-header:not(.featured-image) .site-description,
 html.deluminator-palette.deluminator-dark .entry .entry-title,
 html.deluminator-palette.deluminator-dark .entry .entry-title a,
 html.deluminator-palette.deluminator-dark .post-navigation .nav-links .post-title,
@@ -190,15 +227,12 @@ html.deluminator-palette.deluminator-dark .entry .entry-content .wp-block-pullqu
 	color: var(--dl-strong);
 }
 
-html.deluminator-palette.deluminator-dark .site-title a:hover,
+html.deluminator-palette.deluminator-dark .site-header:not(.featured-image) .site-title a:hover,
 html.deluminator-palette.deluminator-dark .entry .entry-title a:hover {
 	color: var(--dl-muted);
 }
 
 /* Secondary text */
-html.deluminator-palette.deluminator-dark .site-branding,
-html.deluminator-palette.deluminator-dark .site-description,
-html.deluminator-palette.deluminator-dark .site-header.featured-image .site-description,
 html.deluminator-palette.deluminator-dark .site-info,
 html.deluminator-palette.deluminator-dark #colophon .site-info,
 html.deluminator-palette.deluminator-dark .entry .entry-meta,
@@ -277,10 +311,39 @@ html.deluminator-palette.deluminator-dark .entry .entry-content .wp-block-table 
 	border-color: var(--dl-line);
 }
 
+/*
+ * Highlights: a soft wash of the palette's highlight colour, peaking at 28%,
+ * so light text (and links) on it keep at least 7:1 in every palette.
+ * Shorthand on purpose: it replaces a light-mode gradient as well as a flat colour,
+ * while the site's own padding and rounded corners stay.
+ */
 html.deluminator-palette.deluminator-dark mark,
 html.deluminator-palette.deluminator-dark ins {
-	background: var(--dl-mark);
-	color: var(--dl-mark-text);
+	background: var(--dl-surface-2);
+	background: linear-gradient(-100deg,
+		color-mix(in srgb, var(--dl-mark) 12%, transparent),
+		color-mix(in srgb, var(--dl-mark) 28%, transparent) 95%,
+		color-mix(in srgb, var(--dl-mark) 5%, transparent));
+	color: var(--dl-strong);
+}
+
+html.deluminator-palette.deluminator-dark mark a,
+html.deluminator-palette.deluminator-dark mark a:visited,
+html.deluminator-palette.deluminator-dark ins a,
+html.deluminator-palette.deluminator-dark .entry .entry-content mark a,
+html.deluminator-palette.deluminator-dark .entry .entry-content mark a:visited,
+html.deluminator-palette.deluminator-dark .entry .entry-content ins a {
+	color: var(--dl-strong);
+	text-decoration: underline;
+	text-decoration-color: var(--dl-link);
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.15em;
+}
+
+html.deluminator-palette.deluminator-dark mark a:hover,
+html.deluminator-palette.deluminator-dark .entry .entry-content mark a:hover,
+html.deluminator-palette.deluminator-dark .entry .entry-content ins a:hover {
+	color: var(--dl-link-hover);
 }
 
 /* Forms and buttons */
