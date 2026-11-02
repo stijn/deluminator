@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.2
+- Dark mode: over a header photo, the site title (and the post's author and date) turned link-blue once you had visited the link. Everything on the header photo now keeps the theme's white.
+
 ## 1.1.1
 - Phones: the switch no longer sits over the text. It slides out of the way while you scroll down to read and comes back as soon as you scroll up or reach the top. Wide screens, where the text has margins, keep it in place.
 - Logged in on a phone, the switch stayed 46px down after the admin bar had scrolled away. It now follows the admin bar.

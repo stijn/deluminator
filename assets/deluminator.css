@@ -227,6 +227,20 @@ html.deluminator-palette.deluminator-dark .entry .entry-content .wp-block-pullqu
 	color: var(--dl-strong);
 }
 
+/*
+ * Over a header photo the theme draws the title, motto and post details white (dimmed on hover).
+ * Say so explicitly: the dark link colours, visited links especially, would otherwise
+ * outrank the theme and turn them blue.
+ */
+html.deluminator-palette.deluminator-dark .site-header.featured-image .site-description,
+html.deluminator-palette.deluminator-dark .site-header.featured-image a,
+html.deluminator-palette.deluminator-dark .site-header.featured-image a:link,
+html.deluminator-palette.deluminator-dark .site-header.featured-image a:visited,
+html.deluminator-palette.deluminator-dark .site-header.featured-image a:hover,
+html.deluminator-palette.deluminator-dark .site-header.featured-image a:active {
+	color: #fff;
+}
+
 html.deluminator-palette.deluminator-dark .site-header:not(.featured-image) .site-title a:hover,
 html.deluminator-palette.deluminator-dark .entry .entry-title a:hover {
 	color: var(--dl-muted);
