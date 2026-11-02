@@ -3,7 +3,7 @@
  * Plugin Name:       Deluminator
  * Plugin URI:        https://github.com/stijn/deluminator
  * Description:       A light/dark/auto switch. Dark mode sucks the light into the switch; light mode lets it back out. Choose the dark palette under Settings › Deluminator.
- * Version:           1.1.0
+ * Version:           1.1.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Stijn Vogels
@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-const DELUMINATOR_VERSION = '1.1.0';
+const DELUMINATOR_VERSION = '1.1.1';
 const DELUMINATOR_FILE    = __FILE__;
 
 /** Browser chrome colour (mobile address bar) in light mode. Dark mode uses the palette background. */

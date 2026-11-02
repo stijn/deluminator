@@ -131,6 +131,63 @@
 	window.addEventListener('load', rescan);
 	rescan();
 
+	/* ---------- Placement ---------- */
+
+	var lastY     = window.scrollY;
+	var tucking   = false; // Only where the switch would sit over the text.
+	var ticking   = false;
+	var TOP_ZONE  = 80;    // Always shown this close to the top of the page.
+	var JITTER    = 8;     // Ignore tiny scroll wobbles.
+
+	// Keep clear of the admin bar while it is on screen; on phones it scrolls away with the page.
+	function placeBelowAdminBar() {
+		var bar = document.getElementById('wpadminbar'), offset = 0;
+		if (bar) offset = Math.max(0, Math.round(bar.getBoundingClientRect().bottom));
+		button.style.setProperty('--dl-top', offset + 'px');
+	}
+
+	// Does the switch cover the reading column? True on phones, false on wide screens with margins.
+	function coversText() {
+		var b = button.getBoundingClientRect();
+		var lines = document.querySelectorAll('.entry-content p, .entry-summary p, main p, article p, .site-main p');
+		for (var i = 0; i < lines.length && i < 40; i++) {
+			var r = lines[i].getBoundingClientRect();
+			if (r.width && r.right > b.left && r.left < b.right) return true;
+		}
+		return false;
+	}
+
+	function measure() {
+		placeBelowAdminBar();
+		tucking = coversText();
+		if (!tucking) button.classList.remove('is-tucked');
+	}
+
+	function onScroll() {
+		ticking = false;
+		var y = window.scrollY;
+		placeBelowAdminBar();
+		if (!tucking) { lastY = y; return; }
+		if (y < TOP_ZONE) {
+			button.classList.remove('is-tucked');
+		} else if (y - lastY > JITTER) {
+			if (!button.matches(':focus-visible')) button.classList.add('is-tucked'); // Reading on: out of the way.
+		} else if (lastY - y > JITTER) {
+			button.classList.remove('is-tucked'); // Scrolling back up: here it is.
+		} else {
+			return; // Keep lastY until the movement is clear.
+		}
+		lastY = y;
+	}
+
+	window.addEventListener('scroll', function () {
+		if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
+	}, { passive: true });
+	window.addEventListener('resize', measure);
+	window.addEventListener('load', measure);
+	button.addEventListener('focus', function () { button.classList.remove('is-tucked'); });
+
+	measure();
 	render(D.mode);
 	button.classList.add('is-ready');
 })();
